@@ -56,20 +56,20 @@ public class UserService {
 
     public void deleteUser(int id){
         User user=userRepository.findById(id);
-        if(user.getCoursesList().size()==0){
-            userRepository.deleteById(id);
-        }
-
-        else{
-//            List<Courses> courses=user.getCoursesList();
-
-//        courses.stream().map(courses1 -> {courses1.setUser(null);return courses1;}).collect(Collectors.toList());
-            for(Courses courses:user.getCoursesList()){
-                courses.setUser(null);
-                //coursesRepository.save(courses);
-            }
+//        if(user.getCoursesList().size()==0){
+//            userRepository.deleteById(id);
+//        }
+//
+//        else{
+////            List<Courses> courses=user.getCoursesList();
+//
+////        courses.stream().map(courses1 -> {courses1.setUser(null);return courses1;}).collect(Collectors.toList());
+//            for(Courses courses:user.getCoursesList()){
+//                courses.setUser(null);
+//                //coursesRepository.save(courses);
+//            }
             this.userRepository.deleteById(id);
-        }
+//        }
 
     }
 

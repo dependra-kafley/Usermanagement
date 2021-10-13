@@ -2,10 +2,10 @@ package com.dependra.restfullearning.restfullearning.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonAppend;
-
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 public class Courses {
@@ -16,21 +16,16 @@ public class Courses {
     private String courseName;
     @NotNull
     private String courseDetail;
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "user_course",
-            joinColumns = @JoinColumn(name="course_id"),
+    @OneToMany(mappedBy = "courses")
+            @JsonIgnore
+    Set<UserCourse> userCourse;
 
-            inverseJoinColumns = @JoinColumn(name = "user_id")
 
-    )
-    @JsonIgnore
-        private List <User> user;
-
-    public Courses(int courseId, String courseName, String courseDetail, List<User> user) {
+    public Courses(int courseId, String courseName, String courseDetail, Set<User> user) {
         this.courseId = courseId;
         this.courseName = courseName;
         this.courseDetail = courseDetail;
-        this.user = user;
+
     }
 
     public Courses() {
@@ -60,13 +55,11 @@ public class Courses {
         this.courseDetail = courseDetail;
     }
 
-    public List<User> getUser() {
-        return user;
+    public Set<UserCourse> getUserCourse() {
+        return userCourse;
     }
 
-    public void setUser(List<User> user) {
-        this.user = user;
+    public void setUserCourse(Set<UserCourse> userCourse) {
+        this.userCourse = userCourse;
     }
-
-
 }

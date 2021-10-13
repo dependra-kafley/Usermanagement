@@ -1,14 +1,13 @@
 package com.dependra.restfullearning.restfullearning.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.hibernate.annotations.OnDelete;
-
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 public class User {
@@ -34,19 +33,17 @@ public class User {
     @Email(message = "Please enter a valid email")
     private String email;
 
-    @ManyToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user")
     @JsonIgnore
-    private List<Courses> coursesList;
+    Set<UserCourse> userCourse;
 
-    public List<Courses> getCoursesList() {
-        return coursesList;
+    public Set<UserCourse> getUserCourse() {
+        return userCourse;
     }
 
-    public void setCoursesList(List<Courses> coursesList) {
-        this.coursesList = coursesList;
+    public void setUserCourse(Set<UserCourse> userCourse) {
+        this.userCourse = userCourse;
     }
-
-
 
     public User(String name, String address, String phoneNo, String email) {
         this.name = name;

@@ -1,6 +1,5 @@
 package com.dependra.restfullearning.restfullearning.controller;
 import com.dependra.restfullearning.restfullearning.dto.*;
-import com.dependra.restfullearning.restfullearning.exceptions.CustomizedResponseEntityExceptionHandler;
 import com.dependra.restfullearning.restfullearning.model.Courses;
 import com.dependra.restfullearning.restfullearning.model.User;
 import com.dependra.restfullearning.restfullearning.service.CoursesService;
@@ -10,10 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
 import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
@@ -28,42 +29,63 @@ public class UserController {
     @Autowired
     CoursesService coursesService;
 
-    @Autowired
-    UserConverter userConverter;
 
     @Autowired
-    CourseConverter courseConverter;
+    CourseDto courseConverter;
+
+    @Autowired
+    UserDto userDto;
 
     @GetMapping("/users")
-    public ResponseEntity<List<UserGetDto>> getAllUsers() {
+    public ResponseEntity<List<UserDto>> getAllUsers() {
         List<User> userList = userService.getAllUsers();
         if (userList == null) {
             throw new UserNotFoundException("No users Found");
         } else {
-            return ResponseEntity.of(Optional.of(userConverter.entityToDto(userList)));
+            return ResponseEntity.of(Optional.of(userDto.entityToDto(userList)));
         }
     }
 
+    @GetMapping("/userWithPaginatedAndSorting")
+    public ResponseEntity<Page<UserDto>> getPagiantedAndSorteduser(@RequestParam(required = false, defaultValue = "0") int page,
+                                                                   @RequestParam(required = false, defaultValue = "address")
+                                                                           String sortingValue) {
+        Pageable pageable = PageRequest.of(page, 2, Sort.by(sortingValue));
+        Page<User> users = userService.getPaginatedUser(pageable);
+        Page<UserDto> userGetDtos = users.map(user -> {
+            UserDto userGetDto = new UserDto();
+            userGetDto.setName(user.getName());
+            userGetDto.setEmail(user.getEmail());
+            userGetDto.setId(user.getId());
+            //userGetDto.setCoursesList(user.getCoursesList());
+            userGetDto.setPhoneNo(user.getPhoneNo());
+            userGetDto.setAddress(user.getAddress());
+            return userGetDto;
+        });
+
+        return ResponseEntity.of(Optional.of(userGetDtos));
+    }
+
     @GetMapping("/usersSorted/{field}")
-    public ResponseEntity<List<UserGetDto>> getSortedUser(@PathVariable String field) {
+    public ResponseEntity<List<UserDto>> getSortedUser(@PathVariable String field) {
         List<User> userList = userService.getSortedUser(field);
         if (userList == null) {
             throw new UserNotFoundException("No users Found");
         } else {
-            return ResponseEntity.of(Optional.of(userConverter.entityToDto(userList)));
+            return ResponseEntity.of(Optional.of(new UserDto().entityToDto(userList)));
         }
     }
 
     @GetMapping("/usersPaginates/{page}")
-    public ResponseEntity<Page<UserGetDto>> getPaginatedUsers(@PathVariable int page){
-        Pageable pageable= PageRequest.of(page,2);
-        Page<User> users=userService.getPaginatedUser(pageable);
-        Page<UserGetDto> userGetDtos=users.map(user -> {
-            UserGetDto userGetDto=new UserGetDto();
+    public ResponseEntity<Page<UserDto>> getPaginatedUsers(@PathVariable int page) {
+        Pageable pageable = PageRequest.of(page, 2);
+        Page<User> users = userService.getPaginatedUser(pageable);
+        Page<UserDto> userGetDtos = users.map(user -> {
+            UserDto userGetDto = new UserDto();
             userGetDto.setName(user.getName());
             userGetDto.setEmail(user.getEmail());
             userGetDto.setId(user.getId());
-            userGetDto.setCoursesList(user.getCoursesList());
+            //userGetDto.setCoursesList(user.getCoursesList());
             userGetDto.setPhoneNo(user.getPhoneNo());
             userGetDto.setAddress(user.getAddress());
             return userGetDto;
@@ -72,19 +94,21 @@ public class UserController {
 
     }
 
+
     @GetMapping("/users/{id}")
-    public ResponseEntity<UserGetDto> getUserById(@PathVariable int id) {
+    public ResponseEntity<UserDto> getUserById(@PathVariable int id) {
         User user = this.userService.getUserById(id);
         if (user == null) {
             throw new UserNotFoundException("User with id does not exist");
         } else {
-            return ResponseEntity.of(Optional.of(userConverter.entityToDto(user)));
+            return ResponseEntity.of(Optional.of(new UserDto().entityToDto(user)));
         }
     }
 
     @PostMapping("/users")
-    public ResponseEntity<User> adduser(@Valid @RequestBody UserPostDto userPostDto) {
-        User user=userConverter.dtoToUser(userPostDto);
+    public ResponseEntity<User> adduser(@Valid @RequestBody UserDto userDto) {
+        //User user=userConverter.dtoToUser(userPostDto);
+        User user = userDto.dtoToUser(userDto);
         System.out.println(user.toString());
         User savedUser = null;
 
@@ -136,21 +160,23 @@ public class UserController {
         if (user == null) {
             throw new UserNotFoundException("User with id does not exist");
         } else {
-            List<Courses> coursesList = user.getCoursesList();
-            return ResponseEntity.of(Optional.of(coursesList));
+//            Set<Courses> coursesList = user.getCoursesList();
+//            List<Courses> coursesList1=coursesList.stream().collect(Collectors.toList());
+//            return ResponseEntity.of(Optional.of(user));
+            return ResponseEntity.status(HttpStatus.OK).build();
         }
     }
 
     @PostMapping("/users/{id}/courses")
-    public ResponseEntity<User> addCourse(@PathVariable int id, @Valid @RequestBody CoursePostDto coursePostDto) {
+    public ResponseEntity<User> addCourse(@PathVariable int id, @Valid @RequestBody CourseDto coursePostDto) {
         User user = this.userService.getUserById(id);
         if (user == null) {
             throw new UserNotFoundException("User with id does not exist");
         } else {
-            Courses courses=courseConverter.dtoToUser(coursePostDto);
-            Courses courses1=coursesService.getCourseById(courses.getCourseId());
-            courses1.getUser().add(user);
-            Courses saveduser=coursesService.updateCourses(courses1,courses1.getCourseId());
+            Courses courses = courseConverter.dtoToUser(coursePostDto);
+            Courses courses1 = coursesService.getCourseById(courses.getCourseId());
+            // courses1.getUser().add(user);
+            Courses saveduser = coursesService.updateCourses(courses1, courses1.getCourseId());
             return ResponseEntity.ok().build();
         }
     }
