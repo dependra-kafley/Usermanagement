@@ -4,6 +4,8 @@ import com.dependra.restfullearning.restfullearning.dao.CoursesRepository;
 import com.dependra.restfullearning.restfullearning.model.Courses;
 import com.dependra.restfullearning.restfullearning.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,6 +28,10 @@ public class CoursesService {
         courses.setCourseId(id);
         return coursesRepository.save(courses);
 
+    }
+
+    public Page<Courses> getAllPageableCourses(Pageable pageable){
+        return coursesRepository.findAll(pageable);
     }
 
     public List<Courses> getAllCourses(){

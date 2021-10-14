@@ -1,5 +1,4 @@
 package com.dependra.restfullearning.restfullearning.controller;
-
 import com.dependra.restfullearning.restfullearning.dto.UserCourseDto;
 import com.dependra.restfullearning.restfullearning.exceptions.CourseNotFoundException;
 import com.dependra.restfullearning.restfullearning.exceptions.UserNotFoundException;
@@ -18,8 +17,7 @@ import java.util.stream.Collectors;
 
 @RestController
 public class UserCourseController {
-    @Autowired
-    UserCourseDto userCourseDto;
+
 
     @Autowired
     UserCourseService userCourseService;
@@ -29,6 +27,8 @@ public class UserCourseController {
 
     @Autowired
     CoursesService coursesService;
+
+    UserCourseDto userCourseDto=new UserCourseDto();
 
     @GetMapping("/usersCourses")
     public ResponseEntity<List<UserCourseDto>> getAll() {

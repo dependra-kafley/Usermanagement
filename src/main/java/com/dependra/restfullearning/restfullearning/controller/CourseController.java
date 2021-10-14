@@ -7,6 +7,8 @@ import com.dependra.restfullearning.restfullearning.model.Courses;
 import com.dependra.restfullearning.restfullearning.model.User;
 import com.dependra.restfullearning.restfullearning.service.CoursesService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,8 +25,8 @@ public class CourseController {
     @Autowired
     CoursesService coursesService;
 
-   @Autowired
-   CourseDto courseDto;
+
+   CourseDto courseDto = new CourseDto();
 
 
 
@@ -47,7 +49,7 @@ public class CourseController {
         URI location= ServletUriComponentsBuilder.fromCurrentRequest().
                 path("/{id}").buildAndExpand(courses1.getCourseId()).toUri();
 
-        return ResponseEntity.status(HttpStatus.CREATED).location(location).build();
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PostMapping("/courses/{id}")
@@ -58,7 +60,14 @@ public class CourseController {
         //courses.getUser().add(user);
         Courses SavedCourses= coursesService.updateCourses(courses,id);
         CourseDto courseGetDto=courseDto.entityToDto(SavedCourses);
+
         return ResponseEntity.status(HttpStatus.OK).body(courseGetDto);
+    }
+
+    @GetMapping("/coursePageable")
+    public ResponseEntity getPageable(Pageable pageable){
+          Page<Courses> courses= coursesService.getAllPageableCourses(pageable);
+            return ResponseEntity.of(Optional.of(courses));
     }
 
 

@@ -29,12 +29,8 @@ public class UserController {
     @Autowired
     CoursesService coursesService;
 
-
-    @Autowired
-    CourseDto courseConverter;
-
-    @Autowired
-    UserDto userDto;
+    CourseDto courseDto=new CourseDto();
+    UserDto userDto=new UserDto();
 
     @GetMapping("/users")
     public ResponseEntity<List<UserDto>> getAllUsers() {
@@ -79,6 +75,7 @@ public class UserController {
     @GetMapping("/usersPaginates/{page}")
     public ResponseEntity<Page<UserDto>> getPaginatedUsers(@PathVariable int page) {
         Pageable pageable = PageRequest.of(page, 2);
+
         Page<User> users = userService.getPaginatedUser(pageable);
         Page<UserDto> userGetDtos = users.map(user -> {
             UserDto userGetDto = new UserDto();
@@ -97,7 +94,7 @@ public class UserController {
 
     @GetMapping("/users/{id}")
     public ResponseEntity<UserDto> getUserById(@PathVariable int id) {
-        User user = this.userService.getUserById(id);
+        User user = userService.getUserById(id);
         if (user == null) {
             throw new UserNotFoundException("User with id does not exist");
         } else {
@@ -121,7 +118,7 @@ public class UserController {
                         .fromCurrentRequest()
                         .path("/{id}")
                         .buildAndExpand(savedUser.getId()).toUri();
-                return ResponseEntity.status(HttpStatus.CREATED).location(location).build();
+                return ResponseEntity.status(HttpStatus.CREATED).build();
             } catch (Exception e) {
                 e.printStackTrace();
                 return ResponseEntity.internalServerError().build();
@@ -131,23 +128,24 @@ public class UserController {
     }
 
     @DeleteMapping("/users/{id}")
-    public ResponseEntity<User> deleteUser(@PathVariable int id) {
+    public ResponseEntity deleteUser(@PathVariable int id) {
         try {
             this.userService.deleteUser(id);
             return ResponseEntity.status(HttpStatus.OK).build();
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            System.out.println("exception"+e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
 
     @PutMapping("/users/{id}")
     public ResponseEntity<User> updateUser(@PathVariable int id, @Valid @RequestBody User user) {
         try {
-            if (this.userService.getUserById(id) == null) {
+            if (userService.getUserById(id) == null) {
                 throw new UserNotFoundException("User Not Found");
             }
 
-            this.userService.updateUser(user, id);
+            userService.updateUser(user, id);
             return ResponseEntity.ok().body(user);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -156,7 +154,7 @@ public class UserController {
 
     @GetMapping("/users/{id}/courses")
     public ResponseEntity<List<Courses>> getCoursesEnrolled(@PathVariable int id) {
-        User user = this.userService.getUserById(id);
+        User user = userService.getUserById(id);
         if (user == null) {
             throw new UserNotFoundException("User with id does not exist");
         } else {
@@ -169,11 +167,11 @@ public class UserController {
 
     @PostMapping("/users/{id}/courses")
     public ResponseEntity<User> addCourse(@PathVariable int id, @Valid @RequestBody CourseDto coursePostDto) {
-        User user = this.userService.getUserById(id);
+        User user = userService.getUserById(id);
         if (user == null) {
             throw new UserNotFoundException("User with id does not exist");
         } else {
-            Courses courses = courseConverter.dtoToUser(coursePostDto);
+            Courses courses = courseDto.dtoToUser(coursePostDto);
             Courses courses1 = coursesService.getCourseById(courses.getCourseId());
             // courses1.getUser().add(user);
             Courses saveduser = coursesService.updateCourses(courses1, courses1.getCourseId());

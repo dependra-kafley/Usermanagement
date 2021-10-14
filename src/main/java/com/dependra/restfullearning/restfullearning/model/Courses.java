@@ -17,7 +17,7 @@ public class Courses {
     @NotNull
     private String courseDetail;
     @OneToMany(mappedBy = "courses")
-            @JsonIgnore
+    @JsonIgnore
     Set<UserCourse> userCourse;
 
 

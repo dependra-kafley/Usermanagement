@@ -1,14 +1,9 @@
 package com.dependra.restfullearning.restfullearning.dto;
-
 import com.dependra.restfullearning.restfullearning.model.Courses;
-import com.dependra.restfullearning.restfullearning.model.User;
-import org.springframework.stereotype.Component;
-
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Component
+
 public class CourseDto {
     private  int id;
     private String courseDetail;
